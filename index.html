@@ -152,6 +152,13 @@ label { font-weight: 400; font-size: 0.95rem; }
 .after-note { margin: 0; text-align: center; color: var(--muted); font-size: 0.9rem; }
 .after-note.ok { color: var(--accent); font-weight: 700; }
 .help-btn { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; }
+/* A soft glowing ring on ? until it's tapped the first time */
+.help-btn.pulse { border-color: var(--accent); color: var(--accent); animation: help-pulse 2s ease-in-out infinite; }
+@keyframes help-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) { .help-btn.pulse { animation: none; } }
 .help { border: 2px solid var(--accent); }
 .help ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
 .help p { margin: 0; color: var(--muted); font-size: 0.95rem; }
@@ -753,8 +760,9 @@ function render() {
   $("icon-close").toggleAttribute("hidden", state.view !== "overall");
   $("log-view").hidden = state.view !== "log";
   $("overall-view").hidden = state.view !== "overall";
-  const helpShown = state.view === "log" && (helpOpen || (store("helpSeen") !== "1" && !helpDismissed));
+  const helpShown = state.view === "log" && helpOpen;
   $("help").hidden = !helpShown;
+  $("help-btn").classList.toggle("pulse", !helpSeen);
   $("help-btn").setAttribute("aria-pressed", String(helpShown));
   $("help-btn").setAttribute("aria-label", t("helpShow"));
   $("help-btn").title = t("helpShow");
@@ -1094,14 +1102,14 @@ $("overall-btn").addEventListener("click", () => {
   window.scrollTo({ top: 0 });
 });
 $("overall-back").addEventListener("click", () => { state.view = "log"; render(); window.scrollTo({ top: 0 }); });
-// First-visit help; remembered per phone, and also hidden for this visit if storage is blocked
-let helpDismissed = false, helpOpen = false;
-$("help-ok").addEventListener("click", () => { helpDismissed = true; helpOpen = false; store("helpSeen", "1"); render(); });
-// The ? button brings the welcome card back, or closes it
+// The welcome card opens only from the ? button; the button pulses until it's been tapped once on this phone
+let helpSeen = store("helpSeen") === "1", helpOpen = false;
+$("help-ok").addEventListener("click", () => { helpOpen = false; render(); });
 $("help-btn").addEventListener("click", () => {
-  const shown = !$("help").hidden;
-  if (shown) { helpDismissed = true; helpOpen = false; store("helpSeen", "1"); }
-  else { helpOpen = true; state.view = "log"; }
+  helpOpen = $("help").hidden;
+  if (helpOpen) state.view = "log";
+  helpSeen = true;
+  store("helpSeen", "1");
   render();
   window.scrollTo({ top: 0 });
 });

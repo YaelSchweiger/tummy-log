@@ -1,0 +1,1174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tummy Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap">
+<style>
+/* Layout: one narrow column, thumb-reachable buttons, food/poop as two tabs under a shared "who" card */
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+:root {
+  --bg: #eef8f4;
+  --surface: #ffffff;
+  --fg: #1b2523;
+  --muted: #5a6865;
+  --line: #d3e6df;
+  --accent: #1d6b66;
+  --accent-fg: #ffffff;
+  --dairy: #2f66ad;
+  --dairy-soft: #e6eef9;
+  --wheat: #a8730f;
+  --wheat-soft: #f8efdc;
+  --poop: #84553a;
+  --poop-soft: #f3e8e1;
+  --danger: #b3261e;
+  --tile: #eef0ef;
+  --p-normal: #3f9b5a; --p-soft: #d2a21f; --p-verysoft: #e0782b; --p-fluid: #c8402f;
+  --banner: #dcf1ea;
+  --banner-fg: #1d4f4a;
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121817; --surface: #1b2321; --fg: #e8efed; --muted: #9aa9a5; --line: #2e3a37;
+    --accent: #5cc0b8; --accent-fg: #0d1715;
+    --dairy: #7fadeb; --dairy-soft: #1c2a3d; --wheat: #e2b25a; --wheat-soft: #33291a;
+    --poop: #d29c7c; --poop-soft: #33251e; --danger: #f2a49e; --banner: #1d322e; --banner-fg: #bfe6dc;
+    --tile: #262d2c;
+    --p-normal: #6fcf8a; --p-soft: #e8c25a; --p-verysoft: #f0995a; --p-fluid: #ef6f5e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121817; --surface: #1b2321; --fg: #e8efed; --muted: #9aa9a5; --line: #2e3a37;
+  --accent: #5cc0b8; --accent-fg: #0d1715;
+  --dairy: #7fadeb; --dairy-soft: #1c2a3d; --wheat: #e2b25a; --wheat-soft: #33291a;
+  --poop: #d29c7c; --poop-soft: #33251e; --danger: #f2a49e; --banner: #1d322e; --banner-fg: #bfe6dc;
+  --tile: #262d2c;
+  --p-normal: #6fcf8a; --p-soft: #e8c25a; --p-verysoft: #f0995a; --p-fluid: #ef6f5e;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  -webkit-text-size-adjust: 100%;
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.45;
+}
+.wrap {
+  max-width: 520px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 48px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
+h1 { font-size: 1.6rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.1rem; }
+h3 { font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.top-actions { display: flex; align-items: center; gap: 8px; }
+.icon-btn {
+  width: 42px; height: 42px; display: grid; place-items: center;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--fg);
+}
+.icon-btn[aria-pressed="true"] { background: var(--fg); color: var(--surface); border-color: var(--fg); }
+.lang { display: flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--surface); }
+.lang button { border: 0; background: none; padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; color: var(--muted); }
+.lang button[aria-pressed="true"] { background: var(--fg); color: var(--surface); }
+
+.banner { background: var(--banner); color: var(--banner-fg); border-radius: 10px; padding: 10px 14px; font-size: 0.9rem; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  min-height: 48px; padding: 10px 16px; border-radius: 12px;
+  border: 1.5px solid var(--line); background: var(--surface);
+  font-weight: 400; flex: 1 1 auto; text-align: center;
+}
+.chip[aria-pressed="true"] { background: var(--sel, var(--accent)); border-color: var(--sel, var(--accent)); color: var(--sel-fg, var(--accent-fg)); font-weight: 700; }
+.chips.small .chip { min-height: 40px; padding: 6px 12px; font-size: 0.95rem; flex: 0 1 auto; }
+
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.seg .chip { font-size: 1.05rem; }
+/* Names as an even grid, so every name button is the same size */
+#person { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px; }
+.tabs button { border: 0; background: none; padding: 12px; border-radius: 10px; font-weight: 400; font-size: 1.05rem; color: var(--muted); }
+.tabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); font-weight: 700; }
+.tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.tab-icon { font-size: 1.3rem; line-height: 1; }
+.tab-icon.plate { color: #3d8be0; flex: none; }
+
+.when { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.when-text { font-weight: 400; }
+.when-label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; display: block; font-weight: 700; }
+.link { border: 0; background: none; color: var(--accent); font-weight: 400; padding: 8px 4px; text-decoration: underline; text-underline-offset: 3px; }
+.link.danger { color: var(--danger); }
+.picker { display: flex; flex-direction: column; gap: 8px; }
+#who-full { gap: 12px; }
+
+.food.dairy { --sel: var(--dairy); --sel-fg: var(--surface); background: var(--tile); border-color: transparent; }
+.food.wheat { --sel: var(--wheat); --sel-fg: var(--surface); background: var(--tile); border-color: transparent; }
+.food.dairy h3 { color: var(--dairy); }
+.food.wheat h3 { color: var(--wheat); }
+.food h3 .emoji { font-size: 1.4rem; line-height: 1; }
+.poop-card { --sel: var(--poop); --sel-fg: var(--surface); background: var(--tile); border-color: transparent; }
+.poop-card h3 { color: var(--poop); }
+
+input[type="text"], input[type="date"], textarea {
+  width: 100%; box-sizing: border-box; font: inherit; color: var(--fg);
+  background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px;
+}
+input[type="date"] { min-height: 48px; }
+textarea { min-height: 72px; resize: vertical; }
+label { font-weight: 400; font-size: 0.95rem; }
+
+.primary {
+  border: 0; border-radius: 14px; background: var(--accent); color: var(--accent-fg);
+  font-weight: 700; font-size: 1.1rem; padding: 16px; min-height: 56px; width: 100%;
+}
+.primary.poop-btn { background: var(--poop); color: var(--surface); font-size: 1.2rem; min-height: 72px; }
+.quiet { border: 1.5px dashed var(--line); background: none; border-radius: 14px; padding: 14px; font-weight: 400; color: var(--muted); width: 100%; }
+.view { display: flex; flex-direction: column; gap: 12px; }
+.edit-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--banner); color: var(--banner-fg); border-radius: 12px; padding: 4px 12px; font-weight: 400; }
+.edit-bar .link { color: inherit; }
+.row-actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.issue-box { display: flex; flex-direction: column; align-items: center; gap: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.issue-box .card { width: 100%; box-sizing: border-box; }
+.issues { border: 2px solid var(--p-verysoft); }
+.issues li { grid-template-columns: 1fr auto; }
+.issues .meta { grid-column: 1 / 3; }
+.after-note { margin: 0; text-align: center; color: var(--muted); font-size: 0.9rem; }
+.after-note.ok { color: var(--accent); font-weight: 700; }
+.help-btn { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; }
+.help { border: 2px solid var(--accent); }
+.help ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.help p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+.backup-btn { border: 1.5px solid var(--accent); color: var(--accent); background: none; border-radius: 12px; padding: 12px; font-weight: 400; width: 100%; }
+.poop-auto { margin: 0; color: var(--muted); font-size: 0.85rem; text-align: center; }
+
+.log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.log li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 10px 1fr auto; gap: 4px 12px; align-items: start; }
+.log .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; grid-row: span 2; background: var(--accent); }
+.log .dot.poop { background: var(--poop); }
+.log .dot.none { background: var(--muted); }
+.log .main { min-width: 0; }
+.log .meta { color: var(--muted); font-size: 0.85rem; grid-column: 2 / 4; }
+.log .edit { grid-row: 1; grid-column: 3; padding: 0 4px; }
+.log .tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; margin-left: 6px; color: var(--muted); }
+.empty { color: var(--muted); }
+
+.day-group { display: flex; flex-direction: column; gap: 8px; }
+.day-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.day-sum { display: flex; gap: 6px; flex-wrap: wrap; }
+.pill { font-size: 0.8rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.pill.dairy { background: var(--dairy-soft); color: var(--dairy); }
+.pill.wheat { background: var(--wheat-soft); color: var(--wheat); }
+.pill.poop { background: var(--poop-soft); color: var(--poop); }
+.note-soon { color: var(--muted); font-size: 0.9rem; margin: 0; }
+
+.week { gap: 0; }
+.week h2 { margin-bottom: 8px; }
+.week-row {
+  display: grid; grid-template-columns: minmax(48px, 0.8fr) repeat(3, minmax(0, 1fr)); align-items: center; gap: 6px;
+  width: 100%; padding: 10px 2px; border: 0; border-top: 1px solid var(--line); background: none; text-align: left;
+}
+.week-head { border-top: 0; font-weight: 700; font-size: 0.95rem; padding-block: 2px 6px; }
+.week-head span:not(:first-child) { text-align: center; }
+.week-head span { font-size: 0.85rem; }
+.week-day { font-weight: 400; font-variant-numeric: tabular-nums; }
+.cell { display: flex; flex-direction: column; gap: 4px; align-items: center; min-width: 0; min-height: 16px; }
+.mark {
+  display: inline-flex; align-items: center; gap: 5px; max-width: 100%;
+  padding: 3px 9px 3px 6px; border-radius: 999px; font-size: 0.82rem; font-weight: 400;
+}
+.mark > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mark.dairy { background: var(--dairy-soft); color: var(--dairy); }
+.mark.wheat { background: var(--wheat-soft); color: var(--wheat); }
+.mark.poop { color: var(--fg); background: var(--tile); }
+.mark.poop.normal { background: color-mix(in srgb, var(--p-normal) 22%, transparent); }
+.mark.poop.soft { background: color-mix(in srgb, var(--p-soft) 22%, transparent); }
+.mark.poop.verysoft { background: color-mix(in srgb, var(--p-verysoft) 24%, transparent); }
+.mark.poop.fluid { background: color-mix(in srgb, var(--p-fluid) 26%, transparent); }
+.dash { color: var(--line); }
+.check { color: var(--muted); font-weight: 400; font-size: 0.82rem; }
+.d { display: inline-block; width: 10px; height: 10px; border-radius: 50%; box-sizing: border-box; flex: none; }
+/* Food amount as fill level: full circle = whole meal, half = a couple of bites, ring = other */
+.d.dairy { color: var(--dairy); }
+.d.wheat { color: var(--wheat); }
+.d.dairy, .d.wheat { width: 12px; height: 12px; border: 1.5px solid currentColor; }
+.d.meal { background: currentColor; }
+.d.bites { background: linear-gradient(to top, currentColor 50%, transparent 50%); }
+.d.poop.normal { background: var(--p-normal); }
+.d.poop.soft { background: var(--p-soft); }
+.d.poop.verysoft { background: var(--p-verysoft); }
+.d.poop.fluid { background: var(--p-fluid); }
+.d.poop.unknown { background: var(--muted); }
+.week .note-soon { padding-top: 8px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px);
+  background: var(--fg); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-weight: 700;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100% - 32px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1 data-t="title">Tummy Log</h1>
+    <div class="top-actions">
+      <button class="icon-btn help-btn" id="help-btn" aria-pressed="false">?</button>
+      <button class="icon-btn" id="overall-btn" aria-pressed="false">
+        <svg id="icon-chart" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 21h18M6 17v-5M12 17V5M18 17v-8"/></svg>
+        <svg id="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" hidden><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="lang" role="group" aria-label="Language">
+        <button id="lang-en" aria-pressed="true">EN</button>
+        <button id="lang-de" aria-pressed="false">DE</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="card help" id="help" hidden aria-labelledby="help-h">
+    <h2 id="help-h" data-t="helpTitle"></h2>
+    <ol>
+      <li data-t="help1"></li>
+      <li data-t="help2"></li>
+      <li data-t="help3"></li>
+    </ol>
+    <p data-t="helpShared"></p>
+    <button class="link" id="help-issue" data-t="issueOpen"></button>
+    <button class="primary" id="help-ok" data-t="helpOk"></button>
+  </section>
+
+  <!-- Logging -->
+  <div class="view" id="log-view">
+    <section class="card" aria-labelledby="who-h">
+      <div class="when" id="who-compact" hidden>
+        <div><span class="when-label" data-t="reportingAs"></span><span class="when-text" id="who-name"></span></div>
+        <button class="link" id="who-change" data-t="change"></button>
+      </div>
+      <div class="picker" id="who-full">
+        <h2 id="who-h" data-t="who"></h2>
+        <div class="seg" id="place"></div>
+        <div class="chips" id="person" hidden></div>
+      </div>
+    </section>
+
+    <div class="tabs" role="tablist">
+      <button id="tab-food" role="tab" aria-selected="true"><svg class="tab-icon plate" width="26" height="22" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="6.5"/><circle cx="14" cy="12" r="3.8" fill="currentColor" fill-opacity="0.25"/><path d="M3 4v4.5a1.8 1.8 0 0 0 1.8 1.8V20M4.8 4v4M6.6 4v4.5a1.8 1.8 0 0 1-1.8 1.8"/><path d="M25 4c-1.6 1-2.2 3.2-2.2 6.5H25Z" fill="currentColor" fill-opacity="0.25"/><path d="M25 10.5V20"/></svg><span data-t="food"></span></button>
+      <button id="tab-poop" role="tab" aria-selected="false"><span class="tab-icon" aria-hidden="true">💩</span><span data-t="poop"></span></button>
+    </div>
+
+    <!-- Food -->
+    <section class="view" id="food-view">
+      <div class="edit-bar" id="food-edit-bar" hidden>
+        <span data-t="editing"></span>
+        <button class="link" id="food-cancel" data-t="cancel"></button>
+      </div>
+      <div class="card">
+        <div class="when">
+          <div><span class="when-label" data-t="when"></span><span class="when-text" id="food-when-text"></span></div>
+          <button class="link" id="food-when-btn" data-t="change"></button>
+        </div>
+        <div class="picker" id="food-when-pick" hidden>
+          <div class="chips small" id="food-day"></div>
+          <input type="date" id="food-date" hidden>
+          <div class="chips small" id="food-part"></div>
+        </div>
+      </div>
+
+      <div class="card food dairy">
+        <h3><span class="emoji" aria-hidden="true">🥛</span><span data-t="dairy"></span></h3>
+        <div class="chips" id="dairy-amt"></div>
+        <input type="text" id="dairy-other" hidden>
+      </div>
+
+      <div class="card food wheat">
+        <h3><span class="emoji" aria-hidden="true">🍞</span><span data-t="wheat"></span></h3>
+        <div class="chips" id="wheat-amt"></div>
+        <input type="text" id="wheat-other" hidden>
+      </div>
+
+      <button class="primary" id="food-save"></button>
+      <p class="after-note" id="food-after"></p>
+      <button class="quiet" id="none-today" data-t="noneToday"></button>
+      <button class="link danger" id="food-delete" hidden></button>
+    </section>
+
+    <!-- Poop -->
+    <section class="view" id="poop-view" hidden>
+      <div class="edit-bar" id="poop-edit-bar" hidden>
+        <span data-t="editing"></span>
+        <button class="link" id="poop-cancel" data-t="cancel"></button>
+      </div>
+      <div class="card">
+        <div class="when">
+          <div><span class="when-label" data-t="when"></span><span class="when-text" id="poop-when-text"></span></div>
+          <button class="link" id="poop-when-btn" data-t="change"></button>
+        </div>
+        <div class="picker" id="poop-when-pick" hidden>
+          <div class="chips small" id="poop-day"></div>
+          <input type="date" id="poop-date" hidden>
+          <div class="chips small" id="poop-part"></div>
+        </div>
+      </div>
+
+      <div class="card food poop-card">
+        <h3><span class="emoji" aria-hidden="true">💩</span><span data-t="type"></span></h3>
+        <div class="chips" id="poop-type"></div>
+        <label for="poop-note" data-t="note"></label>
+        <textarea id="poop-note"></textarea>
+      </div>
+
+      <button class="primary" id="poop-save"></button>
+      <p class="after-note" id="poop-after"></p>
+      <button class="link danger" id="poop-delete" hidden></button>
+    </section>
+
+    <section class="view" aria-labelledby="log-h">
+      <h2 id="log-h"></h2>
+      <ul class="log" id="log"></ul>
+    </section>
+
+    <section class="issue-box">
+      <button class="link" id="issue-open" data-t="issueOpen"></button>
+      <div class="card" id="issue-form" hidden>
+        <label for="issue-text" data-t="issueLabel"></label>
+        <textarea id="issue-text"></textarea>
+        <p class="note-soon" data-t="issueWho"></p>
+        <button class="primary" id="issue-send" data-t="issueSend"></button>
+        <button class="link" id="issue-cancel" data-t="cancel"></button>
+      </div>
+    </section>
+  </div>
+
+  <!-- Overall data -->
+  <section class="view" id="overall-view" hidden>
+    <div><button class="link" id="overall-back" data-t="backToLog"></button></div>
+    <h2 data-t="overallTitle"></h2>
+    <p class="note-soon" id="overall-note"></p>
+    <div class="view" id="overall-list"></div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const T = {
+  en: {
+    title: "Tummy Log",
+    bannerLoading: "Loading saved entries…",
+    bannerOffline: "Can't reach the saved entries right now. Check your internet connection.",
+    bannerLocal: "Preview: not connected, so entries aren't saved.",
+    bannerSignedOut: "Sign in to Claude to save entries.",
+    showOverall: "Show overall data", closeOverall: "Close overall data", backToLog: "← Back to logging",
+    who: "Who's reporting?", reportingAs: "Reporting as", home: "Home", school: "School",
+    anna: "Anna", sophie: "Sophie", stefanie: "Stefanie", sandra: "Sandra", mom: "Mom", dad: "Dad",
+    food: "Food", poop: "Poop",
+    when: "When", change: "Change", today: "Today", yesterday: "Yesterday", otherDate: "Other date…",
+    morning: "Morning", lunch: "Lunch", afternoon: "Afternoon", evening: "Evening", night: "Night",
+    dairy: "Dairy", wheat: "Wheat",
+    bites: "A couple of bites", meal: "Whole meal", other: "Other…", otherPh: "Type how much",
+    save: "Save", saveChanges: "Save changes", noneToday: "No dairy or wheat today",
+    editing: "Editing your entry", cancel: "Cancel", edit: "Edit",
+    del: "Delete this entry", delSure: "Tap again to delete",
+    addPoop: "Add poop for today", poopLogged: "Poop logged", poopEditing: "Editing poop",
+    type: "Please choose the consistency (this is important for us)", normal: "Normal", soft: "Soft", verysoft: "Very soft", fluid: "Fluid / diarrhea",
+    note: "Note (optional)", notePh: "Anything else?",
+    poopAuto: "Already saved automatically. Tap Save when you're done.",
+    entriesOf: "{name}'s entries", schoolEntries: "School's entries", yourEntries: "Your entries",
+    pickWhoList: "Tap who's reporting above to see your entries.",
+    example: "Example",
+    pickWho: "First tap who's reporting", pickFood: "Tap how much dairy or wheat",
+    saved: "Saved", deleted: "Deleted",
+    saveFailed: "Couldn't save. Check your internet and try again.",
+    noAccess: "You can see entries but not add them. Ask whoever shared this page to invite you as an Editor.",
+    helpTitle: "Welcome! Logging info takes 3 taps",
+    help1: "Tap who you are, so we know who reported. You only do this once.",
+    help2: "Tap Food or Poop for what you want to log. You can log both, as many times as you need.",
+    help3: "Tap what fits, then tap Add this entry. For poop, always choose the consistency. The note is optional.",
+    pickPoop: "Please choose the consistency first",
+    addEntry: "Add this entry", added: "Added ✓",
+    issueOpen: "Got an issue? Tell us", issueLabel: "What happened, or what's not working?",
+    issueWho: "Your message goes to the person who set up this app.",
+    issueSend: "Send", issueSent: "Thanks! Your message was sent.", issueEmpty: "Write a few words first",
+    issuesTitle: "Reported issues ({n})", issueDone: "Done ✓",
+    addedOk: "✓ Added to your entries below.", logAnother: "You can log another one the same way.",
+    helpShared: "Everything you log is shared with the family. You can edit or delete entries you made on this phone anytime.",
+    helpOk: "Got it", helpShow: "How it works",
+    backup: "⬇ Download Excel backup", backupDone: "Backup saved", backupFail: "Couldn't create the backup. Try again.",
+    colDate: "Date", colPart: "Time of day", colWho: "Who", colWhat: "What",
+    colDairy: "Dairy", colWheat: "Wheat", colPoop: "Poop", colNote: "Note",
+    noneSaved: "Saved: no dairy or wheat today", poopSaved: "Poop logged",
+    empty: "Nothing logged yet.",
+    noneEntry: "No dairy or wheat",
+    overallTitle: "All entries, everyone",
+    overallSoon: "From all caregivers.",
+    examplesNote: "These are examples. They disappear once the first real entry is saved.",
+    overallEmpty: "Nothing logged yet.",
+    weekTitle: "Last 7 days", dayByDay: "Day by day", tapDay: "Tap a day to jump to its entries.",
+    poopThatDay: "Poop that day",
+    bitesShort: "Bites", mealShort: "Meal", noneShort: "none",
+    normalShort: "Normal", softShort: "Soft", verysoftShort: "Very soft", fluidShort: "Fluid"
+  },
+  de: {
+    title: "Bauch-Tagebuch",
+    bannerLoading: "Gespeicherte Einträge werden geladen…",
+    bannerOffline: "Die gespeicherten Einträge sind gerade nicht erreichbar. Prüfe deine Internetverbindung.",
+    bannerLocal: "Vorschau: keine Verbindung, Einträge werden nicht gespeichert.",
+    bannerSignedOut: "Melde dich bei Claude an, um Einträge zu speichern.",
+    showOverall: "Alle Daten anzeigen", closeOverall: "Übersicht schließen", backToLog: "← Zurück zum Eintragen",
+    who: "Wer trägt ein?", reportingAs: "Du trägst ein als", home: "Zuhause", school: "Schule",
+    anna: "Anna", sophie: "Sophie", stefanie: "Stefanie", sandra: "Sandra", mom: "Mama", dad: "Papa",
+    food: "Essen", poop: "Stuhlgang",
+    when: "Wann", change: "Ändern", today: "Heute", yesterday: "Gestern", otherDate: "Anderes Datum…",
+    morning: "Morgens", lunch: "Mittags", afternoon: "Nachmittags", evening: "Abends", night: "Nachts",
+    dairy: "Milchprodukte", wheat: "Weizen",
+    bites: "Ein paar Bissen", meal: "Ganze Mahlzeit", other: "Anderes…", otherPh: "Menge eingeben",
+    save: "Speichern", saveChanges: "Änderungen speichern", noneToday: "Heute keine Milch und kein Weizen",
+    editing: "Du bearbeitest deinen Eintrag", cancel: "Abbrechen", edit: "Bearbeiten",
+    del: "Eintrag löschen", delSure: "Zum Löschen nochmal tippen",
+    addPoop: "Stuhlgang für heute eintragen", poopLogged: "Stuhlgang eingetragen", poopEditing: "Stuhlgang bearbeiten",
+    type: "Bitte die Konsistenz wählen (das ist uns wichtig)", normal: "Normal", soft: "Weich", verysoft: "Sehr weich", fluid: "Flüssig / Durchfall",
+    note: "Notiz (optional)", notePh: "Sonst noch etwas?",
+    poopAuto: "Schon automatisch gespeichert. Tippe auf Speichern, wenn du fertig bist.",
+    entriesOf: "Einträge von {name}", schoolEntries: "Einträge der Schule", yourEntries: "Deine Einträge",
+    pickWhoList: "Wähle oben, wer einträgt, um deine Einträge zu sehen.",
+    example: "Beispiel",
+    pickWho: "Bitte zuerst wählen, wer einträgt", pickFood: "Bitte Menge für Milch oder Weizen wählen",
+    saved: "Gespeichert", deleted: "Gelöscht",
+    saveFailed: "Speichern hat nicht geklappt. Prüfe dein Internet und versuche es nochmal.",
+    noAccess: "Du kannst Einträge sehen, aber nicht hinzufügen. Bitte die Person, die dir die Seite geteilt hat, dich als „Editor“ einzuladen.",
+    helpTitle: "Willkommen! Eintragen geht mit 3 Tipps",
+    help1: "Tippe an, wer du bist, damit wir wissen, wer eingetragen hat. Das machst du nur einmal.",
+    help2: "Tippe auf Essen oder Stuhlgang, je nachdem, was du eintragen willst. Du kannst beides eintragen, so oft wie nötig.",
+    help3: "Antippen, was passt, dann auf „Eintrag hinzufügen“. Beim Stuhlgang bitte immer die Konsistenz wählen. Die Notiz ist freiwillig.",
+    pickPoop: "Bitte zuerst die Konsistenz wählen",
+    addEntry: "Eintrag hinzufügen", added: "Hinzugefügt ✓",
+    issueOpen: "Ein Problem? Sag uns Bescheid", issueLabel: "Was ist passiert oder was funktioniert nicht?",
+    issueWho: "Deine Nachricht geht an die Person, die diese App eingerichtet hat.",
+    issueSend: "Senden", issueSent: "Danke! Deine Nachricht wurde gesendet.", issueEmpty: "Bitte erst ein paar Worte schreiben",
+    issuesTitle: "Gemeldete Probleme ({n})", issueDone: "Erledigt ✓",
+    addedOk: "✓ Hinzugefügt, siehe deine Einträge unten.", logAnother: "Du kannst danach gleich noch einen eintragen.",
+    helpShared: "Alles, was du einträgst, sieht die ganze Familie. Einträge, die du auf diesem Handy gemacht hast, kannst du jederzeit ändern oder löschen.",
+    helpOk: "Verstanden", helpShow: "So funktioniert's",
+    backup: "⬇ Excel-Sicherung herunterladen", backupDone: "Sicherung gespeichert", backupFail: "Sicherung hat nicht geklappt. Versuche es nochmal.",
+    colDate: "Datum", colPart: "Tageszeit", colWho: "Wer", colWhat: "Was",
+    colDairy: "Milchprodukte", colWheat: "Weizen", colPoop: "Stuhlgang", colNote: "Notiz",
+    noneSaved: "Gespeichert: heute keine Milch und kein Weizen", poopSaved: "Stuhlgang eingetragen",
+    empty: "Noch nichts eingetragen.",
+    noneEntry: "Keine Milch, kein Weizen",
+    overallTitle: "Alle Einträge, von allen",
+    overallSoon: "Von allen Betreuenden.",
+    examplesNote: "Das sind Beispiele. Sie verschwinden, sobald der erste echte Eintrag gespeichert ist.",
+    overallEmpty: "Noch nichts eingetragen.",
+    weekTitle: "Letzte 7 Tage", dayByDay: "Tag für Tag", tapDay: "Tippe auf einen Tag, um seine Einträge zu sehen.",
+    poopThatDay: "Stuhlgang an dem Tag",
+    bitesShort: "Bissen", mealShort: "Mahlzeit", noneShort: "keine",
+    normalShort: "Normal", softShort: "Weich", verysoftShort: "Sehr weich", fluidShort: "Flüssig"
+  }
+};
+const PARTS = ["morning", "lunch", "afternoon", "evening", "night"];
+const AMOUNTS = ["bites", "meal", "other"];
+const POOP_TYPES = ["normal", "soft", "verysoft", "fluid"];
+const HOME_PEOPLE = ["anna", "sophie", "stefanie", "sandra", "mom", "dad"];
+
+function store(key, val) {
+  try {
+    if (val === undefined) return localStorage.getItem(key);
+    localStorage.setItem(key, val);
+  } catch (e) { return null; }
+}
+
+// Part of the day from the current Berlin clock
+function berlinPart() {
+  const h = Number(new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone: "Europe/Berlin" }).format(new Date()));
+  if (h >= 5 && h < 11) return "morning";
+  if (h >= 11 && h < 14) return "lunch";
+  if (h >= 14 && h < 17) return "afternoon";
+  if (h >= 17 && h < 21) return "evening";
+  return "night";
+}
+// Berlin calendar date as YYYY-MM-DD, offset by whole days
+function berlinDate(offset = 0) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" }).format(new Date(Date.now() + offset * 86400000));
+}
+
+let seq = 0;
+const newId = () => "e" + Date.now().toString(36) + (seq++).toString(36) + Math.random().toString(36).slice(2, 6);
+
+// Every entry has the same fields, so a merge-write always replaces all of them
+function makeEntry(fields) {
+  return {
+    id: newId(), who: state.person, kind: "food", day: berlinDate(0), part: berlinPart(),
+    dairy: null, dairyOther: "", wheat: null, wheatOther: "", type: null, note: "", at: Date.now(),
+    ...fields
+  };
+}
+
+const state = {
+  lang: store("lang") === "de" ? "de" : "en",
+  place: store("place") || null,
+  person: store("person") || null,
+  whoOpen: false,
+  view: "log",
+  tab: "food",
+  food: null,
+  poop: null,
+  // Storage: "connecting" until the Google Sheet answers, then "live"; "offline" when it can't be reached
+  status: "connecting",
+  entries: []         // everyone's entries, as last loaded from the sheet
+};
+state.food = blankFood();
+state.poop = blankPoop();
+
+// A made-up week of entries for the preview and the empty overview; d = days ago
+function exampleWeek() {
+  const rows = [
+    { d: 6, who: "dad", kind: "poop", part: "morning", type: "normal" },
+    { d: 6, who: "school", kind: "food", part: "lunch", wheat: "meal" },
+    { d: 6, who: "mom", kind: "food", part: "evening", dairy: "bites" },
+    { d: 5, who: "school", kind: "food", part: "lunch", dairy: "meal", wheat: "meal" },
+    { d: 5, who: "anna", kind: "food", part: "afternoon", wheat: "bites" },
+    { d: 5, who: "mom", kind: "poop", part: "evening", type: "soft" },
+    { d: 4, who: "dad", kind: "poop", part: "morning", type: "verysoft", note: "Tummy ache before" },
+    { d: 4, who: "school", kind: "food", part: "lunch", wheat: "bites" },
+    { d: 4, who: "mom", kind: "none", part: "evening" },
+    { d: 3, who: "mom", kind: "poop", part: "morning", type: "normal" },
+    { d: 3, who: "school", kind: "food", part: "lunch", wheat: "meal" },
+    { d: 3, who: "dad", kind: "food", part: "evening", dairy: "other", dairyOther: "Cheese on pasta", wheat: "meal" },
+    { d: 2, who: "sophie", kind: "poop", part: "morning", type: "soft" },
+    { d: 2, who: "school", kind: "poop", part: "afternoon", type: "fluid", note: "Needed a change of clothes" },
+    { d: 2, who: "mom", kind: "none", part: "evening" },
+    { d: 1, who: "dad", kind: "poop", part: "morning", type: "normal" },
+    { d: 1, who: "school", kind: "food", part: "lunch", wheat: "bites" },
+    { d: 1, who: "anna", kind: "food", part: "evening", dairy: "meal" },
+    { d: 0, who: "mom", kind: "poop", part: "morning", type: "soft" },
+    { d: 0, who: "school", kind: "food", part: "lunch", dairy: "bites", wheat: "meal" }
+  ];
+  return rows.map(({ d, ...r }) => ({ ...makeEntry({ day: berlinDate(-d), ...r }), example: true }));
+}
+
+function blankFood() {
+  return { editId: null, editAt: null, day: berlinDate(0), otherOpen: false, part: berlinPart(), dairy: null, dairyOther: "", wheat: null, wheatOther: "" };
+}
+function blankPoop() {
+  return { editId: null, editAt: null, day: berlinDate(0), otherOpen: false, part: berlinPart(), type: null, note: "" };
+}
+
+/* ---------- where entries come from ---------- */
+
+// The Google Sheet behind the app (an Apps Script web app)
+const API = "https://script.google.com/macros/s/AKfycbyXn_nsqjSDXgfsmw-e5c8EJCR67NRLQSxNvzkP51pYbg9XTJA_9y0Vu7q9ITRqwdxZ/exec";
+
+// This phone's id: the sheet only lets the phone that made an entry change or delete it
+function deviceId() {
+  let id = store("deviceId");
+  if (!id) {
+    id = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+    store("deviceId", id);
+  }
+  return id;
+}
+const DEVICE = deviceId();
+// Entries made on this phone, remembered so "your entries" survives a reload
+let mine;
+try { mine = new Set(JSON.parse(store("myEntries") || "[]")); } catch (e) { mine = new Set(); }
+function rememberMine() { store("myEntries", JSON.stringify([...mine])); }
+
+// The sheet turns "2026-11-01" into a date; bring it back to a Berlin calendar day
+function normDay(v) {
+  if (!v) return berlinDate(0);
+  const s = String(v);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" }).format(new Date(s));
+}
+function normEntry(e) {
+  return {
+    id: String(e.id), who: e.who || "", kind: e.kind || "food", day: normDay(e.day), part: e.part || "morning",
+    dairy: e.dairy || null, dairyOther: e.dairyOther ? String(e.dairyOther) : "",
+    wheat: e.wheat || null, wheatOther: e.wheatOther ? String(e.wheatOther) : "",
+    type: e.type || null, note: e.note ? String(e.note) : "", at: Number(e.at) || 0
+  };
+}
+
+function allEntries() { return state.entries; }
+function myEntries() { return state.entries.filter((e) => mine.has(e.id)); }
+function overviewEntries() {
+  return state.entries.length ? { entries: state.entries, examples: false } : { entries: exampleWeek(), examples: true };
+}
+
+/* ---------- saving ---------- */
+
+// A plain-text POST keeps the request "simple", so the browser allows it across sites
+async function post(body) {
+  const res = await fetch(API, { method: "POST", body: JSON.stringify({ ...body, device: DEVICE }) });
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "failed");
+  return data;
+}
+
+// Writes go one at a time, in order; while any is in flight, reloads wait so they don't undo it
+let pending = 0;
+let writeChain = Promise.resolve();
+function queueWrite(fn) {
+  pending++;
+  const p = writeChain.then(fn);
+  writeChain = p.catch(() => {});
+  return p.catch(() => { toast(t("saveFailed")); })
+    .finally(() => { pending--; if (!pending) load(); });
+}
+
+const api = {
+  put(entry) {
+    const e = normEntry(entry);
+    mine.add(e.id);
+    rememberMine();
+    const i = state.entries.findIndex((x) => x.id === e.id);
+    if (i >= 0) state.entries[i] = e; else state.entries.push(e);
+    queueWrite(() => post({ action: "put", entry: e }));
+  },
+  remove(id) {
+    state.entries = state.entries.filter((e) => e.id !== id);
+    queueWrite(async () => {
+      await post({ action: "delete", id });
+      mine.delete(id);
+      rememberMine();
+    });
+  }
+};
+
+// Load everyone's entries now, every 30 seconds, and whenever the app comes back into view
+async function load() {
+  if (pending) return;
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
+    if (!data.ok) throw new Error("failed");
+    if (pending) return;
+    state.entries = (data.entries || []).map(normEntry);
+    state.status = "live";
+  } catch (e) {
+    state.status = "offline";
+  }
+  render();
+}
+function connect() {
+  load();
+  setInterval(load, 30000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
+}
+
+/* ---------- rendering ---------- */
+
+const $ = (id) => document.getElementById(id);
+const t = (k) => T[state.lang][k] ?? k;
+
+function chips(el, keys, selected, onPick, label = t) {
+  el.innerHTML = "";
+  keys.forEach((k) => {
+    const b = document.createElement("button");
+    b.className = "chip";
+    b.type = "button";
+    b.textContent = label(k);
+    b.setAttribute("aria-pressed", String(k === selected));
+    b.addEventListener("click", () => onPick(k));
+    el.appendChild(b);
+  });
+}
+
+// Today / Yesterday / Other date… chips plus a date field, shared by food and poop
+function dayPicker(chipsEl, inputEl, day, otherOpen, onChange) {
+  const today = berlinDate(0), yest = berlinDate(-1);
+  const sel = otherOpen ? "other" : day === today ? "today" : day === yest ? "yesterday" : "other";
+  chips(chipsEl, ["today", "yesterday", "other"], sel, (k) => {
+    if (k === "today") onChange(today, false);
+    else if (k === "yesterday") onChange(yest, false);
+    else { onChange(day, true); inputEl.focus(); }
+  }, (k) => t(k === "other" ? "otherDate" : k));
+  inputEl.hidden = sel !== "other";
+  inputEl.max = today;
+  inputEl.value = day;
+}
+
+function dayLabel(iso) {
+  if (iso === berlinDate(0)) return t("today");
+  if (iso === berlinDate(-1)) return t("yesterday");
+  return new Date(iso + "T12:00:00").toLocaleDateString(state.lang === "de" ? "de-DE" : "en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
+function shortDay(iso) {
+  if (iso === berlinDate(0)) return t("today");
+  return new Date(iso + "T12:00:00").toLocaleDateString(state.lang === "de" ? "de-DE" : "en-GB", { weekday: "short", day: "numeric" });
+}
+function whoName(who) { return who ? t(who) : "?"; }
+function whenText(day, part) { return dayLabel(day) + " · " + t(part); }
+function amountText(a, other) { return a === "other" ? (other || t("other").replace("…", "")) : t(a); }
+function entryText(e) {
+  if (e.kind === "poop") return t("poop") + (e.type ? ": " + t(e.type) : "");
+  if (e.kind === "none") return t("noneEntry");
+  return [e.dairy && t("dairy") + ": " + amountText(e.dairy, e.dairyOther),
+          e.wheat && t("wheat") + ": " + amountText(e.wheat, e.wheatOther)].filter(Boolean).join(" · ");
+}
+function byTime(a, b) {
+  return a.day.localeCompare(b.day) || PARTS.indexOf(a.part) - PARTS.indexOf(b.part) || (a.at || 0) - (b.at || 0);
+}
+
+function render() {
+  document.documentElement.lang = state.lang;
+  document.title = t("title");
+  document.querySelectorAll("[data-t]").forEach((el) => { el.textContent = t(el.dataset.t); });
+  $("lang-en").setAttribute("aria-pressed", String(state.lang === "en"));
+  $("lang-de").setAttribute("aria-pressed", String(state.lang === "de"));
+  $("dairy-other").placeholder = t("otherPh");
+  $("wheat-other").placeholder = t("otherPh");
+  $("poop-note").placeholder = t("notePh");
+
+  const bannerKey = { connecting: "bannerLoading", offline: "bannerOffline", local: "bannerLocal", signedout: "bannerSignedOut" }[state.status];
+  $("banner").hidden = !bannerKey;
+  if (bannerKey) $("banner").textContent = t(bannerKey);
+
+  const overallLabel = state.view === "overall" ? t("closeOverall") : t("showOverall");
+  $("overall-btn").setAttribute("aria-pressed", String(state.view === "overall"));
+  $("overall-btn").setAttribute("aria-label", overallLabel);
+  $("overall-btn").title = overallLabel;
+  // SVG elements have no .hidden property, so toggle the attribute itself
+  $("icon-chart").toggleAttribute("hidden", state.view === "overall");
+  $("icon-close").toggleAttribute("hidden", state.view !== "overall");
+  $("log-view").hidden = state.view !== "log";
+  $("overall-view").hidden = state.view !== "overall";
+  const helpShown = state.view === "log" && (helpOpen || (store("helpSeen") !== "1" && !helpDismissed));
+  $("help").hidden = !helpShown;
+  $("help-btn").setAttribute("aria-pressed", String(helpShown));
+  $("help-btn").setAttribute("aria-label", t("helpShow"));
+  $("help-btn").title = t("helpShow");
+  if (state.view === "overall") { renderOverall(); return; }
+
+  // Who: a compact line once chosen, the full picker while choosing
+  const fullWho = !state.person || state.whoOpen;
+  $("who-full").hidden = !fullWho;
+  $("who-compact").hidden = fullWho;
+  $("who-name").textContent = whoName(state.person);
+  chips($("place"), ["home", "school"], state.place, (k) => {
+    state.place = k;
+    store("place", k);
+    if (k === "school") pickPerson("school");
+    else {
+      if (!HOME_PEOPLE.includes(state.person)) { state.person = null; store("person", ""); }
+      render();
+    }
+  });
+  $("person").hidden = state.place !== "home";
+  chips($("person"), HOME_PEOPLE, state.person, pickPerson);
+
+  // Tabs
+  $("tab-food").setAttribute("aria-selected", String(state.tab === "food"));
+  $("tab-poop").setAttribute("aria-selected", String(state.tab === "poop"));
+  $("food-view").hidden = state.tab !== "food";
+  $("poop-view").hidden = state.tab !== "poop";
+
+  // Food
+  const f = state.food;
+  const editing = !!f.editId;
+  $("food-edit-bar").hidden = !editing;
+  $("food-save").textContent = editing ? t("saveChanges") : t("addEntry");
+  afterNote("food-after", "food", editing);
+  $("none-today").hidden = editing;
+  $("food-delete").hidden = !editing;
+  if (!deleteArmed) $("food-delete").textContent = t("del");
+  $("food-when-text").textContent = whenText(f.day, f.part);
+  dayPicker($("food-day"), $("food-date"), f.day, f.otherOpen, (day, open) => { f.day = day; f.otherOpen = open; render(); });
+  chips($("food-part"), PARTS, f.part, (k) => { f.part = k; render(); });
+  ["dairy", "wheat"].forEach((food) => {
+    chips($(food + "-amt"), AMOUNTS, f[food], (k) => {
+      f[food] = f[food] === k ? null : k;
+      render();
+      if (f[food] === "other") $(food + "-other").focus();
+    });
+    $(food + "-other").hidden = f[food] !== "other";
+    $(food + "-other").value = f[food + "Other"];
+  });
+
+  // Poop: same pattern as food, and the type is required
+  const p = state.poop;
+  const poopEditing = !!p.editId;
+  $("poop-edit-bar").hidden = !poopEditing;
+  $("poop-save").textContent = poopEditing ? t("saveChanges") : t("addEntry");
+  afterNote("poop-after", "poop", poopEditing);
+  $("poop-delete").hidden = !poopEditing;
+  if (!deleteArmed) $("poop-delete").textContent = t("del");
+  $("poop-when-text").textContent = whenText(p.day, p.part);
+  dayPicker($("poop-day"), $("poop-date"), p.day, p.otherOpen, (day, open) => { p.day = day; p.otherOpen = open; render(); });
+  chips($("poop-part"), PARTS, p.part, (k) => { p.part = k; render(); });
+  chips($("poop-type"), POOP_TYPES, p.type, (k) => { p.type = p.type === k ? null : k; render(); });
+  if (document.activeElement !== $("poop-note")) $("poop-note").value = p.note;
+
+  renderLog();
+}
+
+// The line under the add button: a plain hint, or a confirmation for a few seconds after adding
+let justAdded = null, justAddedTimer;
+function markAdded(kind) {
+  justAdded = kind;
+  clearTimeout(justAddedTimer);
+  justAddedTimer = setTimeout(() => { justAdded = null; render(); }, 5000);
+}
+function afterNote(id, kind, editing) {
+  const el = $(id);
+  el.hidden = editing;
+  const ok = justAdded === kind;
+  el.className = "after-note" + (ok ? " ok" : "");
+  el.textContent = ok ? t("addedOk") + " " + t("logAnother") : t("logAnother");
+}
+
+// Only this person's own entries, newest first, each with Edit
+function renderLog() {
+  const ul = $("log");
+  ul.innerHTML = "";
+  const who = state.person;
+  $("log-h").textContent = !who ? t("yourEntries")
+    : who === "school" ? t("schoolEntries")
+    : t("entriesOf").replace("{name}", whoName(who));
+  if (!who) { ul.innerHTML = `<li class="empty">${t("pickWhoList")}</li>`; return; }
+  const mine = myEntries().sort((a, b) => byTime(b, a));
+  if (!mine.length) { ul.innerHTML = `<li class="empty">${t("empty")}</li>`; return; }
+  mine.forEach((e) => {
+    const li = document.createElement("li");
+    const dot = document.createElement("span");
+    dot.className = "dot" + (e.kind === "poop" ? " poop" : e.kind === "none" ? " none" : "");
+    const main = document.createElement("div");
+    main.className = "main";
+    main.textContent = entryText(e);
+    if (e.example) {
+      const tag = document.createElement("span");
+      tag.className = "tag"; tag.textContent = t("example");
+      main.appendChild(tag);
+    }
+    const edit = document.createElement("button");
+    edit.className = "link edit"; edit.textContent = t("edit");
+    edit.addEventListener("click", () => startEdit(e));
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = whenText(e.day, e.part) + (e.note ? " · " + e.note : "");
+    li.append(dot, main, edit, meta);
+    ul.appendChild(li);
+  });
+}
+
+// Everyone's entries: the 7-day table, then each day in full
+function renderOverall() {
+  const box = $("overall-list");
+  box.innerHTML = "";
+  const { entries, examples } = overviewEntries();
+  $("overall-note").textContent = examples ? t("examplesNote") : t("overallSoon");
+  if (!entries.length) { box.innerHTML = `<p class="empty">${t("overallEmpty")}</p>`; return; }
+  box.appendChild(weekGrid(entries));
+  const listH = document.createElement("h2");
+  listH.textContent = t("dayByDay");
+  box.appendChild(listH);
+  const days = [...new Set(entries.map((e) => e.day))].sort().reverse();
+  days.forEach((day) => {
+    const dayEntries = entries.filter((e) => e.day === day).sort(byTime);
+    const g = document.createElement("div");
+    g.className = "day-group";
+    g.id = "day-" + day;
+    const head = document.createElement("div");
+    head.className = "day-head";
+    const h = document.createElement("h3");
+    h.textContent = dayLabel(day);
+    const sum = document.createElement("div");
+    sum.className = "day-sum";
+    const counts = {
+      dairy: dayEntries.filter((e) => e.dairy).length,
+      wheat: dayEntries.filter((e) => e.wheat).length,
+      poop: dayEntries.filter((e) => e.kind === "poop").length
+    };
+    Object.entries(counts).forEach(([k, n]) => {
+      if (!n) return;
+      const pill = document.createElement("span");
+      pill.className = "pill " + k;
+      pill.textContent = t(k) + " ×" + n;
+      sum.appendChild(pill);
+    });
+    head.append(h, sum);
+    const ul = document.createElement("ul");
+    ul.className = "log";
+    dayEntries.forEach((e) => {
+      const li = document.createElement("li");
+      li.style.gridTemplateColumns = "10px 1fr";
+      const dot = document.createElement("span");
+      dot.className = "dot" + (e.kind === "poop" ? " poop" : e.kind === "none" ? " none" : "");
+      const main = document.createElement("div");
+      main.className = "main";
+      main.textContent = entryText(e);
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.style.gridColumn = "2";
+      meta.textContent = t(e.part) + " · " + whoName(e.who) + (e.note ? " · " + e.note : "");
+      li.append(dot, main, meta);
+      ul.appendChild(li);
+    });
+    g.append(head, ul);
+    box.appendChild(g);
+  });
+}
+
+// Last 7 days at a glance: one row per day, dairy / wheat / poop side by side
+function weekGrid(entries) {
+  const card = document.createElement("div");
+  card.className = "card week";
+  const title = document.createElement("h2");
+  title.textContent = t("weekTitle");
+  const head = document.createElement("div");
+  head.className = "week-row week-head";
+  head.innerHTML = `<span></span><span>🥛 ${t("dairy")}</span><span>🍞 ${t("wheat")}</span><span>💩 ${t("poopThatDay")}</span>`;
+  card.append(title, head);
+
+  // Every mark carries its own word, so there is no legend to remember
+  const pill = (cls, dotCls, text) => {
+    const s = document.createElement("span");
+    s.className = "mark " + cls;
+    const d = document.createElement("i");
+    d.className = "d " + dotCls;
+    const w = document.createElement("span");
+    w.textContent = text;
+    s.append(d, w);
+    s.title = text;
+    return s;
+  };
+  const cell = (items) => {
+    const c = document.createElement("span");
+    c.className = "cell";
+    if (items.length) c.append(...items);
+    else c.innerHTML = `<span class="dash">–</span>`;
+    return c;
+  };
+
+  for (let i = 0; i < 7; i++) {
+    const day = berlinDate(-i);
+    const dayEntries = entries.filter((e) => e.day === day).sort(byTime);
+    const none = dayEntries.some((e) => e.kind === "none");
+    const foodDots = (food) => {
+      const dots = dayEntries.filter((e) => e[food]).map((e) => pill(food, food + " " + e[food],
+        e[food] === "other" ? amountText("other", e[food + "Other"]) : t(e[food] + "Short")));
+      if (!dots.length && none) {
+        const ok = document.createElement("span");
+        ok.className = "check"; ok.textContent = "✓ " + t("noneShort");
+        dots.push(ok);
+      }
+      return dots;
+    };
+    const poops = dayEntries.filter((e) => e.kind === "poop")
+      .map((e) => pill("poop " + (e.type || "unknown"), "poop " + (e.type || "unknown"), e.type ? t(e.type + "Short") : "?"));
+
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "week-row";
+    const label = document.createElement("span");
+    label.className = "week-day";
+    label.textContent = shortDay(day);
+    row.append(label, cell(foodDots("dairy")), cell(foodDots("wheat")), cell(poops));
+    row.addEventListener("click", () => {
+      const target = $("day-" + day);
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    card.appendChild(row);
+  }
+
+  const hint = document.createElement("p");
+  hint.className = "note-soon";
+  hint.textContent = t("tapDay");
+  card.append(hint);
+  return card;
+}
+
+/* ---------- actions ---------- */
+
+function pickPerson(k) {
+  state.person = k;
+  state.whoOpen = false;
+  store("person", k);
+  stopEditing();
+  render();
+}
+
+function startEdit(e) {
+  disarmDelete();
+  if (e.kind === "poop") {
+    state.tab = "poop";
+    state.poop = { editId: e.id, editAt: e.at || Date.now(), day: e.day, otherOpen: false, part: e.part, type: e.type || null, note: e.note || "" };
+    $("poop-when-pick").hidden = false;
+    render();
+    $("poop-edit-bar").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    state.tab = "food";
+    state.food = {
+      editId: e.id, editAt: e.at || Date.now(), day: e.day, otherOpen: false, part: e.part,
+      dairy: e.dairy || null, dairyOther: e.dairyOther || "",
+      wheat: e.wheat || null, wheatOther: e.wheatOther || ""
+    };
+    $("food-when-pick").hidden = false;
+    render();
+    $("food-edit-bar").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+function stopEditing() {
+  if (state.food.editId) state.food = blankFood();
+  if (state.poop.editId) state.poop = blankPoop();
+  disarmDelete();
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2600);
+}
+
+// Two-tap delete, since the viewer has no confirm dialogs
+let deleteArmed = null, deleteTimer;
+function disarmDelete() { deleteArmed = null; clearTimeout(deleteTimer); }
+function tapDelete(btn, id, after) {
+  if (deleteArmed === id) {
+    disarmDelete();
+    api.remove(id);
+    after();
+    render();
+    toast(t("deleted"));
+    return;
+  }
+  deleteArmed = id;
+  btn.textContent = t("delSure");
+  clearTimeout(deleteTimer);
+  deleteTimer = setTimeout(() => { disarmDelete(); render(); }, 3000);
+}
+
+function needWho() {
+  if (state.person) return false;
+  toast(t("pickWho"));
+  $("who-h").scrollIntoView({ behavior: "smooth", block: "center" });
+  return true;
+}
+
+function saveFood() {
+  if (needWho()) return;
+  const f = state.food;
+  if (!f.dairy && !f.wheat) { toast(t("pickFood")); return; }
+  const fields = {
+    kind: "food", day: f.day, part: f.part,
+    dairy: f.dairy, dairyOther: f.dairy === "other" ? f.dairyOther.trim() : "",
+    wheat: f.wheat, wheatOther: f.wheat === "other" ? f.wheatOther.trim() : ""
+  };
+  api.put(f.editId ? makeEntry({ ...fields, id: f.editId, at: f.editAt }) : makeEntry(fields));
+  if (!f.editId) markAdded("food");
+  state.food = blankFood();
+  $("food-when-pick").hidden = true;
+  render();
+  toast(t(f.editId ? "saved" : "added"));
+}
+
+$("lang-en").addEventListener("click", () => { state.lang = "en"; store("lang", "en"); render(); });
+$("lang-de").addEventListener("click", () => { state.lang = "de"; store("lang", "de"); render(); });
+$("overall-btn").addEventListener("click", () => {
+  state.view = state.view === "log" ? "overall" : "log";
+  render();
+  window.scrollTo({ top: 0 });
+});
+$("overall-back").addEventListener("click", () => { state.view = "log"; render(); window.scrollTo({ top: 0 }); });
+// First-visit help; remembered per phone, and also hidden for this visit if storage is blocked
+let helpDismissed = false, helpOpen = false;
+$("help-ok").addEventListener("click", () => { helpDismissed = true; helpOpen = false; store("helpSeen", "1"); render(); });
+// The ? button brings the welcome card back, or closes it
+$("help-btn").addEventListener("click", () => {
+  const shown = !$("help").hidden;
+  if (shown) { helpDismissed = true; helpOpen = false; store("helpSeen", "1"); }
+  else { helpOpen = true; state.view = "log"; }
+  render();
+  window.scrollTo({ top: 0 });
+});
+$("who-change").addEventListener("click", () => { state.whoOpen = true; render(); });
+$("tab-food").addEventListener("click", () => { state.tab = "food"; render(); });
+$("tab-poop").addEventListener("click", () => { state.tab = "poop"; render(); });
+$("food-when-btn").addEventListener("click", () => { $("food-when-pick").hidden = !$("food-when-pick").hidden; });
+$("poop-when-btn").addEventListener("click", () => { $("poop-when-pick").hidden = !$("poop-when-pick").hidden; });
+$("food-date").addEventListener("change", (e) => { if (e.target.value) { state.food.day = e.target.value; render(); } });
+$("poop-date").addEventListener("change", (e) => { if (e.target.value) { state.poop.day = e.target.value; render(); } });
+$("dairy-other").addEventListener("input", (e) => { state.food.dairyOther = e.target.value; });
+$("wheat-other").addEventListener("input", (e) => { state.food.wheatOther = e.target.value; });
+
+$("food-save").addEventListener("click", saveFood);
+$("food-cancel").addEventListener("click", () => { state.food = blankFood(); disarmDelete(); $("food-when-pick").hidden = true; render(); });
+$("food-delete").addEventListener("click", (ev) => {
+  tapDelete(ev.currentTarget, state.food.editId, () => { state.food = blankFood(); $("food-when-pick").hidden = true; });
+});
+
+$("none-today").addEventListener("click", () => {
+  if (needWho()) return;
+  api.put(makeEntry({ kind: "none" }));
+  render();
+  toast(t("noneSaved"));
+});
+
+$("poop-note").addEventListener("input", (e) => { state.poop.note = e.target.value; });
+
+// "Got an issue?" goes into the shared store, where the owner (and Claude) can read it
+$("issue-open").addEventListener("click", () => { $("issue-form").hidden = !$("issue-form").hidden; if (!$("issue-form").hidden) $("issue-text").focus(); });
+$("issue-cancel").addEventListener("click", () => { $("issue-form").hidden = true; });
+$("help-issue").addEventListener("click", () => {
+  $("issue-form").hidden = false;
+  $("issue-form").scrollIntoView({ behavior: "smooth", block: "center" });
+  $("issue-text").focus({ preventScroll: true });
+});
+$("issue-send").addEventListener("click", async () => {
+  const text = $("issue-text").value.trim();
+  if (!text) { toast(t("issueEmpty")); return; }
+  try {
+    await post({ action: "issue", who: state.person || "", day: berlinDate(0), text });
+    $("issue-text").value = "";
+    $("issue-form").hidden = true;
+    toast(t("issueSent"));
+  } catch (e) {
+    toast(t("saveFailed"));
+  }
+});
+$("poop-save").addEventListener("click", () => {
+  if (needWho()) return;
+  const p = state.poop;
+  if (!p.type) { toast(t("pickPoop")); return; }
+  const fields = { kind: "poop", day: p.day, part: p.part, type: p.type, note: p.note.trim() };
+  api.put(p.editId ? makeEntry({ ...fields, id: p.editId, at: p.editAt }) : makeEntry(fields));
+  if (!p.editId) markAdded("poop");
+  state.poop = blankPoop();
+  $("poop-note").value = "";
+  $("poop-when-pick").hidden = true;
+  render();
+  toast(t(p.editId ? "saved" : "added"));
+});
+$("poop-cancel").addEventListener("click", () => { state.poop = blankPoop(); $("poop-note").value = ""; disarmDelete(); $("poop-when-pick").hidden = true; render(); });
+$("poop-delete").addEventListener("click", (ev) => {
+  tapDelete(ev.currentTarget, state.poop.editId, () => { state.poop = blankPoop(); $("poop-note").value = ""; $("poop-when-pick").hidden = true; });
+});
+
+render();
+connect();
+</script>
+</body>
+</html>

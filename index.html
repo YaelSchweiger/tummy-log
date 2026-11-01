@@ -152,8 +152,8 @@ label { font-weight: 400; font-size: 0.95rem; }
 .after-note { margin: 0; text-align: center; color: var(--muted); font-size: 0.9rem; }
 .after-note.ok { color: var(--accent); font-weight: 700; }
 .help-btn { font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; }
-/* A soft glowing ring on ? until it's tapped the first time */
-.help-btn.pulse { border-color: var(--accent); color: var(--accent); animation: help-pulse 2s ease-in-out infinite; }
+/* A soft glowing ring on ? for a few seconds when the app opens, then it rests */
+.help-btn.pulse { animation: help-pulse 1.6s ease-in-out 3; }
 @keyframes help-pulse {
   0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
   50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 0%, transparent); }
@@ -762,7 +762,6 @@ function render() {
   $("overall-view").hidden = state.view !== "overall";
   const helpShown = state.view === "log" && helpOpen;
   $("help").hidden = !helpShown;
-  $("help-btn").classList.toggle("pulse", !helpSeen);
   $("help-btn").setAttribute("aria-pressed", String(helpShown));
   $("help-btn").setAttribute("aria-label", t("helpShow"));
   $("help-btn").title = t("helpShow");
@@ -1102,14 +1101,13 @@ $("overall-btn").addEventListener("click", () => {
   window.scrollTo({ top: 0 });
 });
 $("overall-back").addEventListener("click", () => { state.view = "log"; render(); window.scrollTo({ top: 0 }); });
-// The welcome card opens only from the ? button; the button pulses until it's been tapped once on this phone
-let helpSeen = store("helpSeen") === "1", helpOpen = false;
+// The welcome card opens only from the ? button, which pulses briefly each time the app opens
+let helpOpen = false;
+$("help-btn").classList.add("pulse");
 $("help-ok").addEventListener("click", () => { helpOpen = false; render(); });
 $("help-btn").addEventListener("click", () => {
   helpOpen = $("help").hidden;
   if (helpOpen) state.view = "log";
-  helpSeen = true;
-  store("helpSeen", "1");
   render();
   window.scrollTo({ top: 0 });
 });

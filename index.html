@@ -518,6 +518,13 @@ function berlinDate(offset = 0) {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" }).format(new Date(Date.now() + offset * 86400000));
 }
 
+// A link ending in ?lang=de (or ?lang=en) opens in that language and remembers it on this phone
+function startLang() {
+  const fromLink = new URLSearchParams(location.search).get("lang");
+  if (fromLink === "de" || fromLink === "en") { store("lang", fromLink); return fromLink; }
+  return store("lang") === "de" ? "de" : "en";
+}
+
 let seq = 0;
 const newId = () => "e" + Date.now().toString(36) + (seq++).toString(36) + Math.random().toString(36).slice(2, 6);
 
@@ -531,7 +538,7 @@ function makeEntry(fields) {
 }
 
 const state = {
-  lang: store("lang") === "de" ? "de" : "en",
+  lang: startLang(),
   place: store("place") || null,
   person: store("person") || null,
   whoOpen: false,

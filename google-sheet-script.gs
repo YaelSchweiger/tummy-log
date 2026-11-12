@@ -3,7 +3,7 @@
 // (Execute as: Me, Who has access: Anyone).
 
 const ENTRY_COLS = ["id", "device", "who", "kind", "day", "part", "dairy", "dairyOther",
-                    "wheat", "wheatOther", "type", "note", "at"];
+                    "wheat", "wheatOther", "type", "note", "at", "look"];
 const ISSUE_COLS = ["id", "who", "day", "text", "at"];
 
 function sheet_(name, cols) {
@@ -14,6 +14,9 @@ function sheet_(name, cols) {
     sh.appendRow(cols);
     sh.setFrozenRows(1);
     sh.getRange(1, 1, 1, cols.length).setFontWeight("bold");
+  } else if (sh.getLastColumn() < cols.length) {
+    // A column was added later (like "look"): write the full header row again
+    sh.getRange(1, 1, 1, cols.length).setValues([cols]).setFontWeight("bold");
   }
   return sh;
 }

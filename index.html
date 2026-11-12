@@ -28,6 +28,7 @@ html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area
   --danger: #b3261e;
   --tile: #eef0ef;
   --p-normal: #3f9b5a; --p-soft: #d2a21f; --p-verysoft: #e0782b; --p-fluid: #c8402f;
+  --event: #6d4fc2;
   --banner: #dcf1ea;
   --banner-fg: #1d4f4a;
   --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
@@ -40,7 +41,7 @@ html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area
     --dairy: #7fadeb; --dairy-soft: #1c2a3d; --wheat: #e2b25a; --wheat-soft: #33291a;
     --poop: #d29c7c; --poop-soft: #33251e; --danger: #f2a49e; --banner: #1d322e; --banner-fg: #bfe6dc;
     --tile: #262d2c;
-    --p-normal: #6fcf8a; --p-soft: #e8c25a; --p-verysoft: #f0995a; --p-fluid: #ef6f5e;
+    --p-normal: #6fcf8a; --p-soft: #e8c25a; --p-verysoft: #f0995a; --p-fluid: #ef6f5e; --event: #b9a3f2;
     color-scheme: dark;
   }
 }
@@ -50,7 +51,7 @@ html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area
   --dairy: #7fadeb; --dairy-soft: #1c2a3d; --wheat: #e2b25a; --wheat-soft: #33291a;
   --poop: #d29c7c; --poop-soft: #33251e; --danger: #f2a49e; --banner: #1d322e; --banner-fg: #bfe6dc;
   --tile: #262d2c;
-  --p-normal: #6fcf8a; --p-soft: #e8c25a; --p-verysoft: #f0995a; --p-fluid: #ef6f5e;
+  --p-normal: #6fcf8a; --p-soft: #e8c25a; --p-verysoft: #f0995a; --p-fluid: #ef6f5e; --event: #b9a3f2;
   color-scheme: dark;
 }
 
@@ -103,10 +104,11 @@ button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px
 /* Names as an even grid, so every name button is the same size */
 #person { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
-.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px; }
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px; }
 .tabs button { border: 0; background: none; padding: 12px; border-radius: 10px; font-weight: 400; font-size: 1.05rem; color: var(--muted); }
 .tabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); font-weight: 700; }
-.tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; }
+/* Icon above the word, so three tabs fit on a phone in both languages */
+.tabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 8px 4px; font-size: 0.95rem; }
 .tab-icon { font-size: 1.3rem; line-height: 1; }
 .tab-icon.plate { color: #3d8be0; flex: none; }
 
@@ -170,6 +172,15 @@ label { font-weight: 400; font-size: 0.95rem; }
 .log .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 7px; grid-row: span 2; background: var(--accent); }
 .log .dot.poop { background: var(--poop); }
 .log .dot.none { background: var(--muted); }
+.log .dot.event { background: var(--event); }
+.event-card { --sel: var(--event); --sel-fg: var(--surface); background: var(--tile); border-color: transparent; }
+.event-card h3 { color: var(--event); }
+.poop-card h4 { margin: 4px 0 0; font-size: 0.95rem; font-weight: 400; }
+/* A past event as a button, with its own small ✕ to hide it on this phone */
+.sugg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.sugg .chip { border: 0; border-radius: 0; }
+.sugg-x { border: 0; border-left: 1px solid var(--line); background: none; color: var(--muted); padding: 0 12px; font-size: 0.9rem; }
+.week-event { display: block; margin-top: 2px; font-size: 0.72rem; color: var(--event); overflow-wrap: anywhere; }
 .log .main { min-width: 0; }
 .log .meta { color: var(--muted); font-size: 0.85rem; grid-column: 2 / 4; }
 .log .edit { grid-row: 1; grid-column: 3; padding: 0 4px; }
@@ -205,8 +216,9 @@ label { font-weight: 400; font-size: 0.95rem; }
 .mark.dairy { background: var(--dairy-soft); color: var(--dairy); }
 .mark.wheat { background: var(--wheat-soft); color: var(--wheat); }
 .mark.poop { color: var(--fg); background: var(--tile); }
-.mark.poop.normal { background: color-mix(in srgb, var(--p-normal) 22%, transparent); }
-.mark.poop.soft { background: color-mix(in srgb, var(--p-soft) 22%, transparent); }
+.mark.poop.normal, .mark.poop.firm { background: color-mix(in srgb, var(--p-normal) 22%, transparent); }
+.mark.poop.hard { background: color-mix(in srgb, var(--p-soft) 22%, transparent); }
+.mark.poop.soft { background: color-mix(in srgb, var(--p-normal) 22%, transparent); }
 .mark.poop.verysoft { background: color-mix(in srgb, var(--p-verysoft) 24%, transparent); }
 .mark.poop.fluid { background: color-mix(in srgb, var(--p-fluid) 26%, transparent); }
 .dash { color: var(--line); }
@@ -218,8 +230,9 @@ label { font-weight: 400; font-size: 0.95rem; }
 .d.dairy, .d.wheat { width: 12px; height: 12px; border: 1.5px solid currentColor; }
 .d.meal { background: currentColor; }
 .d.bites { background: linear-gradient(to top, currentColor 50%, transparent 50%); }
-.d.poop.normal { background: var(--p-normal); }
-.d.poop.soft { background: var(--p-soft); }
+.d.poop.normal, .d.poop.firm { background: var(--p-normal); }
+.d.poop.hard { background: var(--p-soft); }
+.d.poop.soft { background: var(--p-normal); }
 .d.poop.verysoft { background: var(--p-verysoft); }
 .d.poop.fluid { background: var(--p-fluid); }
 .d.poop.unknown { background: var(--muted); }
@@ -282,6 +295,7 @@ label { font-weight: 400; font-size: 0.95rem; }
     <div class="tabs" role="tablist">
       <button id="tab-food" role="tab" aria-selected="true"><svg class="tab-icon plate" width="26" height="22" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="12" r="6.5"/><circle cx="14" cy="12" r="3.8" fill="currentColor" fill-opacity="0.25"/><path d="M3 4v4.5a1.8 1.8 0 0 0 1.8 1.8V20M4.8 4v4M6.6 4v4.5a1.8 1.8 0 0 1-1.8 1.8"/><path d="M25 4c-1.6 1-2.2 3.2-2.2 6.5H25Z" fill="currentColor" fill-opacity="0.25"/><path d="M25 10.5V20"/></svg><span data-t="food"></span></button>
       <button id="tab-poop" role="tab" aria-selected="false"><span class="tab-icon" aria-hidden="true">💩</span><span data-t="poop"></span></button>
+      <button id="tab-event" role="tab" aria-selected="false"><span class="tab-icon" aria-hidden="true">📌</span><span data-t="event"></span></button>
     </div>
 
     <!-- Food -->
@@ -341,13 +355,44 @@ label { font-weight: 400; font-size: 0.95rem; }
       <div class="card food poop-card">
         <h3><span class="emoji" aria-hidden="true">💩</span><span data-t="type"></span></h3>
         <div class="chips" id="poop-type"></div>
-        <label for="poop-note" data-t="note"></label>
+        <h4 data-t="lookTitle"></h4>
+        <div class="chips" id="poop-look"></div>
+        <label for="poop-note" id="poop-note-label"></label>
         <textarea id="poop-note"></textarea>
       </div>
 
       <button class="primary" id="poop-save"></button>
       <p class="after-note" id="poop-after"></p>
       <button class="link danger" id="poop-delete" hidden></button>
+    </section>
+
+    <!-- Event: something that happened that day (a vaccine, a fever, new medicine) -->
+    <section class="view" id="event-view" hidden>
+      <div class="edit-bar" id="event-edit-bar" hidden>
+        <span data-t="editing"></span>
+        <button class="link" id="event-cancel" data-t="cancel"></button>
+      </div>
+      <div class="card">
+        <div class="when">
+          <div><span class="when-label" data-t="when"></span><span class="when-text" id="event-when-text"></span></div>
+          <button class="link" id="event-when-btn" data-t="change"></button>
+        </div>
+        <div class="picker" id="event-when-pick" hidden>
+          <div class="chips small" id="event-day"></div>
+          <input type="date" id="event-date" hidden>
+          <div class="chips small" id="event-part"></div>
+        </div>
+      </div>
+
+      <div class="card food event-card">
+        <h3><span class="emoji" aria-hidden="true">📌</span><span data-t="eventTitle"></span></h3>
+        <div class="chips small" id="event-suggest"></div>
+        <input type="text" id="event-text">
+      </div>
+
+      <button class="primary" id="event-save"></button>
+      <p class="after-note" id="event-after"></p>
+      <button class="link danger" id="event-delete" hidden></button>
     </section>
 
     <section class="view" aria-labelledby="log-h">
@@ -397,7 +442,7 @@ const T = {
     editing: "Editing your entry", cancel: "Cancel", edit: "Edit",
     del: "Delete this entry", delSure: "Tap again to delete",
     addPoop: "Add poop for today", poopLogged: "Poop logged", poopEditing: "Editing poop",
-    type: "Please choose the consistency (this is important for us)", normal: "Normal", soft: "Soft", verysoft: "Very soft", fluid: "Fluid / diarrhea",
+    type: "Please choose the consistency (this is important for us)", normal: "Normal", hard: "Hard", firm: "Firm, in pieces", soft: "Soft but OK", verysoft: "Very soft", fluid: "Diarrhea",
     note: "Note (optional)", notePh: "Anything else?",
     poopAuto: "Already saved automatically. Tap Save when you're done.",
     entriesOf: "{name}'s entries", schoolEntries: "School's entries", yourEntries: "Your entries",
@@ -409,7 +454,11 @@ const T = {
     noAccess: "You can see entries but not add them. Ask whoever shared this page to invite you as an Editor.",
     helpTitle: "Welcome! Logging info takes 3 taps",
     help1: "Tap who you are, so we know who reported. You only do this once.",
-    help2: "Tap Food or Poop for what you want to log. You can log both, as many times as you need.",
+    help2: "Tap Food, Poop or Event for what you want to log. You can log all of them, as many times as you need.",
+    event: "Event", eventTitle: "What happened?", eventPh: "For example: vaccine, fever, new medicine",
+    eventEmpty: "Type what happened first", eventHide: "Remove this button",
+    lookTitle: "How did it look overall?", lookOk: "Looks OK", lookOff: "Looks off",
+    lookOkShort: "looks OK", lookOffShort: "looks off", noteOff: "What looked off? Please write a few words.",
     help3: "Tap what fits, then tap Add this entry. For poop, always choose the consistency. The note is optional.",
     pickPoop: "Please choose the consistency first",
     addEntry: "Add this entry", added: "Added ✓",
@@ -433,7 +482,7 @@ const T = {
     weekTitle: "Last 7 days", dayByDay: "Day by day", tapDay: "Tap a day to jump to its entries.",
     poopThatDay: "Poop that day",
     bitesShort: "Bites", mealShort: "Meal", noneShort: "none",
-    normalShort: "Normal", softShort: "Soft", verysoftShort: "Very soft", fluidShort: "Fluid"
+    normalShort: "Normal", hardShort: "Hard", firmShort: "Firm", softShort: "Soft, OK", verysoftShort: "Very soft", fluidShort: "Diarrhea"
   },
   de: {
     title: "Bauch-Tagebuch",
@@ -453,7 +502,7 @@ const T = {
     editing: "Du bearbeitest deinen Eintrag", cancel: "Abbrechen", edit: "Bearbeiten",
     del: "Eintrag löschen", delSure: "Zum Löschen nochmal tippen",
     addPoop: "Stuhlgang für heute eintragen", poopLogged: "Stuhlgang eingetragen", poopEditing: "Stuhlgang bearbeiten",
-    type: "Bitte die Konsistenz wählen (das ist uns wichtig)", normal: "Normal", soft: "Weich", verysoft: "Sehr weich", fluid: "Flüssig / Durchfall",
+    type: "Bitte die Konsistenz wählen (das ist uns wichtig)", normal: "Normal", hard: "Hart", firm: "Fest, in Stücken", soft: "Weich, aber okay", verysoft: "Sehr weich", fluid: "Durchfall",
     note: "Notiz (optional)", notePh: "Sonst noch etwas?",
     poopAuto: "Schon automatisch gespeichert. Tippe auf Speichern, wenn du fertig bist.",
     entriesOf: "Einträge von {name}", schoolEntries: "Einträge der Schule", yourEntries: "Deine Einträge",
@@ -465,7 +514,11 @@ const T = {
     noAccess: "Du kannst Einträge sehen, aber nicht hinzufügen. Bitte die Person, die dir die Seite geteilt hat, dich als „Editor“ einzuladen.",
     helpTitle: "Willkommen! Eintragen geht mit 3 Tipps",
     help1: "Tippe an, wer du bist, damit wir wissen, wer eingetragen hat. Das machst du nur einmal.",
-    help2: "Tippe auf Essen oder Stuhlgang, je nachdem, was du eintragen willst. Du kannst beides eintragen, so oft wie nötig.",
+    help2: "Tippe auf Essen, Stuhlgang oder Ereignis, je nachdem, was du eintragen willst. Du kannst alles eintragen, so oft wie nötig.",
+    event: "Ereignis", eventTitle: "Was ist passiert?", eventPh: "Zum Beispiel: Impfung, Fieber, neues Medikament",
+    eventEmpty: "Bitte zuerst eintragen, was passiert ist", eventHide: "Diesen Knopf entfernen",
+    lookTitle: "Wie sah er insgesamt aus?", lookOk: "Sieht okay aus", lookOff: "Sieht auffällig aus",
+    lookOkShort: "sieht okay aus", lookOffShort: "auffällig", noteOff: "Was war auffällig? Bitte kurz beschreiben.",
     help3: "Antippen, was passt, dann auf „Eintrag hinzufügen“. Beim Stuhlgang bitte immer die Konsistenz wählen. Die Notiz ist freiwillig.",
     pickPoop: "Bitte zuerst die Konsistenz wählen",
     addEntry: "Eintrag hinzufügen", added: "Hinzugefügt ✓",
@@ -489,12 +542,13 @@ const T = {
     weekTitle: "Letzte 7 Tage", dayByDay: "Tag für Tag", tapDay: "Tippe auf einen Tag, um seine Einträge zu sehen.",
     poopThatDay: "Stuhlgang an dem Tag",
     bitesShort: "Bissen", mealShort: "Mahlzeit", noneShort: "keine",
-    normalShort: "Normal", softShort: "Weich", verysoftShort: "Sehr weich", fluidShort: "Flüssig"
+    normalShort: "Normal", hardShort: "Hart", firmShort: "Fest", softShort: "Weich, okay", verysoftShort: "Sehr weich", fluidShort: "Durchfall"
   }
 };
 const PARTS = ["morning", "lunch", "afternoon", "evening", "night"];
 const AMOUNTS = ["bites", "meal", "other"];
-const POOP_TYPES = ["normal", "soft", "verysoft", "fluid"];
+// A scale from hard to diarrhea; "normal" stays readable for entries made before the scale
+const POOP_TYPES = ["hard", "firm", "soft", "verysoft", "fluid"];
 const HOME_PEOPLE = ["anna", "sophie", "stefanie", "sandra", "mom", "dad"];
 
 function store(key, val) {
@@ -532,7 +586,7 @@ const newId = () => "e" + Date.now().toString(36) + (seq++).toString(36) + Math.
 function makeEntry(fields) {
   return {
     id: newId(), who: state.person, kind: "food", day: berlinDate(0), part: berlinPart(),
-    dairy: null, dairyOther: "", wheat: null, wheatOther: "", type: null, note: "", at: Date.now(),
+    dairy: null, dairyOther: "", wheat: null, wheatOther: "", type: null, look: null, note: "", at: Date.now(),
     ...fields
   };
 }
@@ -552,26 +606,28 @@ const state = {
 };
 state.food = blankFood();
 state.poop = blankPoop();
+state.event = blankEvent();
 
 // A made-up week of entries for the preview and the empty overview; d = days ago
 function exampleWeek() {
   const rows = [
-    { d: 6, who: "dad", kind: "poop", part: "morning", type: "normal" },
+    { d: 6, who: "dad", kind: "poop", part: "morning", type: "firm" },
     { d: 6, who: "school", kind: "food", part: "lunch", wheat: "meal" },
     { d: 6, who: "mom", kind: "food", part: "evening", dairy: "bites" },
     { d: 5, who: "school", kind: "food", part: "lunch", dairy: "meal", wheat: "meal" },
     { d: 5, who: "anna", kind: "food", part: "afternoon", wheat: "bites" },
+    { d: 5, who: "mom", kind: "event", part: "afternoon", note: "Vaccine" },
     { d: 5, who: "mom", kind: "poop", part: "evening", type: "soft" },
-    { d: 4, who: "dad", kind: "poop", part: "morning", type: "verysoft", note: "Tummy ache before" },
+    { d: 4, who: "dad", kind: "poop", part: "morning", type: "verysoft", look: "off", note: "Tummy ache before" },
     { d: 4, who: "school", kind: "food", part: "lunch", wheat: "bites" },
     { d: 4, who: "mom", kind: "none", part: "evening" },
-    { d: 3, who: "mom", kind: "poop", part: "morning", type: "normal" },
+    { d: 3, who: "mom", kind: "poop", part: "morning", type: "firm" },
     { d: 3, who: "school", kind: "food", part: "lunch", wheat: "meal" },
     { d: 3, who: "dad", kind: "food", part: "evening", dairy: "other", dairyOther: "Cheese on pasta", wheat: "meal" },
     { d: 2, who: "sophie", kind: "poop", part: "morning", type: "soft" },
     { d: 2, who: "school", kind: "poop", part: "afternoon", type: "fluid", note: "Needed a change of clothes" },
     { d: 2, who: "mom", kind: "none", part: "evening" },
-    { d: 1, who: "dad", kind: "poop", part: "morning", type: "normal" },
+    { d: 1, who: "dad", kind: "poop", part: "morning", type: "firm" },
     { d: 1, who: "school", kind: "food", part: "lunch", wheat: "bites" },
     { d: 1, who: "anna", kind: "food", part: "evening", dairy: "meal" },
     { d: 0, who: "mom", kind: "poop", part: "morning", type: "soft" },
@@ -584,7 +640,10 @@ function blankFood() {
   return { editId: null, editAt: null, day: berlinDate(0), otherOpen: false, part: berlinPart(), dairy: null, dairyOther: "", wheat: null, wheatOther: "" };
 }
 function blankPoop() {
-  return { editId: null, editAt: null, day: berlinDate(0), otherOpen: false, part: berlinPart(), type: null, note: "" };
+  return { editId: null, editAt: null, day: berlinDate(0), otherOpen: false, part: berlinPart(), type: null, look: null, note: "" };
+}
+function blankEvent() {
+  return { editId: null, editAt: null, day: berlinDate(0), otherOpen: false, part: berlinPart(), text: "" };
 }
 
 /* ---------- where entries come from ---------- */
@@ -619,7 +678,8 @@ function normEntry(e) {
     id: String(e.id), who: e.who || "", kind: e.kind || "food", day: normDay(e.day), part: e.part || "morning",
     dairy: e.dairy || null, dairyOther: e.dairyOther ? String(e.dairyOther) : "",
     wheat: e.wheat || null, wheatOther: e.wheatOther ? String(e.wheatOther) : "",
-    type: e.type || null, note: e.note ? String(e.note) : "", at: Number(e.at) || 0
+    type: e.type || null, look: e.look === "ok" || e.look === "off" ? e.look : null,
+    note: e.note ? String(e.note) : "", at: Number(e.at) || 0
   };
 }
 
@@ -735,7 +795,8 @@ function whoName(who) { return who ? t(who) : "?"; }
 function whenText(day, part) { return dayLabel(day) + " · " + t(part); }
 function amountText(a, other) { return a === "other" ? (other || t("other").replace("…", "")) : t(a); }
 function entryText(e) {
-  if (e.kind === "poop") return t("poop") + (e.type ? ": " + t(e.type) : "");
+  if (e.kind === "event") return "📌 " + e.note;
+  if (e.kind === "poop") return t("poop") + (e.type ? ": " + t(e.type) : "") + (e.look ? " · " + t(e.look === "ok" ? "lookOkShort" : "lookOffShort") : "");
   if (e.kind === "none") return t("noneEntry");
   return [e.dairy && t("dairy") + ": " + amountText(e.dairy, e.dairyOther),
           e.wheat && t("wheat") + ": " + amountText(e.wheat, e.wheatOther)].filter(Boolean).join(" · ");
@@ -794,8 +855,10 @@ function render() {
   // Tabs
   $("tab-food").setAttribute("aria-selected", String(state.tab === "food"));
   $("tab-poop").setAttribute("aria-selected", String(state.tab === "poop"));
+  $("tab-event").setAttribute("aria-selected", String(state.tab === "event"));
   $("food-view").hidden = state.tab !== "food";
   $("poop-view").hidden = state.tab !== "poop";
+  $("event-view").hidden = state.tab !== "event";
 
   // Food
   const f = state.food;
@@ -831,9 +894,70 @@ function render() {
   dayPicker($("poop-day"), $("poop-date"), p.day, p.otherOpen, (day, open) => { p.day = day; p.otherOpen = open; render(); });
   chips($("poop-part"), PARTS, p.part, (k) => { p.part = k; render(); });
   chips($("poop-type"), POOP_TYPES, p.type, (k) => { p.type = p.type === k ? null : k; render(); });
+  chips($("poop-look"), ["ok", "off"], p.look, (k) => {
+    p.look = p.look === k ? null : k;
+    render();
+    if (p.look === "off") $("poop-note").focus();
+  }, (k) => t(k === "ok" ? "lookOk" : "lookOff"));
+  $("poop-note-label").textContent = p.look === "off" ? t("noteOff") : t("note");
   if (document.activeElement !== $("poop-note")) $("poop-note").value = p.note;
 
+  // Event: typed text, with past events from everyone as quick buttons
+  const ev = state.event;
+  const eventEditing = !!ev.editId;
+  $("event-edit-bar").hidden = !eventEditing;
+  $("event-save").textContent = eventEditing ? t("saveChanges") : t("addEntry");
+  afterNote("event-after", "event", eventEditing);
+  $("event-delete").hidden = !eventEditing;
+  if (!deleteArmed) $("event-delete").textContent = t("del");
+  $("event-when-text").textContent = whenText(ev.day, ev.part);
+  dayPicker($("event-day"), $("event-date"), ev.day, ev.otherOpen, (day, open) => { ev.day = day; ev.otherOpen = open; render(); });
+  chips($("event-part"), PARTS, ev.part, (k) => { ev.part = k; render(); });
+  $("event-text").placeholder = t("eventPh");
+  if (document.activeElement !== $("event-text")) $("event-text").value = ev.text;
+  renderSuggestions();
+
   renderLog();
+}
+
+// Past events (newest first, no repeats) as buttons; ✕ hides one on this phone only
+let hiddenEvents;
+try { hiddenEvents = new Set(JSON.parse(store("hiddenEvents") || "[]")); } catch (e) { hiddenEvents = new Set(); }
+function renderSuggestions() {
+  const box = $("event-suggest");
+  box.innerHTML = "";
+  const seen = new Set();
+  const texts = [];
+  state.entries.filter((e) => e.kind === "event" && e.note).sort((a, b) => byTime(b, a)).forEach((e) => {
+    const key = e.note.trim().toLowerCase();
+    if (seen.has(key) || hiddenEvents.has(key)) return;
+    seen.add(key);
+    texts.push(e.note.trim());
+  });
+  box.hidden = !texts.length;
+  texts.slice(0, 12).forEach((text) => {
+    const wrap = document.createElement("span");
+    wrap.className = "sugg";
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.textContent = text;
+    b.setAttribute("aria-pressed", String(state.event.text.trim().toLowerCase() === text.toLowerCase()));
+    b.addEventListener("click", () => { state.event.text = text; $("event-text").value = text; render(); });
+    const x = document.createElement("button");
+    x.type = "button";
+    x.className = "sugg-x";
+    x.textContent = "✕";
+    x.setAttribute("aria-label", t("eventHide") + ": " + text);
+    x.title = t("eventHide");
+    x.addEventListener("click", () => {
+      hiddenEvents.add(text.toLowerCase());
+      store("hiddenEvents", JSON.stringify([...hiddenEvents]));
+      render();
+    });
+    wrap.append(b, x);
+    box.appendChild(wrap);
+  });
 }
 
 // The line under the add button: a plain hint, or a confirmation for a few seconds after adding
@@ -865,7 +989,7 @@ function renderLog() {
   mine.forEach((e) => {
     const li = document.createElement("li");
     const dot = document.createElement("span");
-    dot.className = "dot" + (e.kind === "poop" ? " poop" : e.kind === "none" ? " none" : "");
+    dot.className = "dot" + (e.kind === "poop" ? " poop" : e.kind === "none" ? " none" : e.kind === "event" ? " event" : "");
     const main = document.createElement("div");
     main.className = "main";
     main.textContent = entryText(e);
@@ -879,7 +1003,7 @@ function renderLog() {
     edit.addEventListener("click", () => startEdit(e));
     const meta = document.createElement("div");
     meta.className = "meta";
-    meta.textContent = whenText(e.day, e.part) + (e.note ? " · " + e.note : "");
+    meta.textContent = whenText(e.day, e.part) + (e.note && e.kind !== "event" ? " · " + e.note : "");
     li.append(dot, main, edit, meta);
     ul.appendChild(li);
   });
@@ -927,14 +1051,14 @@ function renderOverall() {
       const li = document.createElement("li");
       li.style.gridTemplateColumns = "10px 1fr";
       const dot = document.createElement("span");
-      dot.className = "dot" + (e.kind === "poop" ? " poop" : e.kind === "none" ? " none" : "");
+      dot.className = "dot" + (e.kind === "poop" ? " poop" : e.kind === "none" ? " none" : e.kind === "event" ? " event" : "");
       const main = document.createElement("div");
       main.className = "main";
       main.textContent = entryText(e);
       const meta = document.createElement("div");
       meta.className = "meta";
       meta.style.gridColumn = "2";
-      meta.textContent = t(e.part) + " · " + whoName(e.who) + (e.note ? " · " + e.note : "");
+      meta.textContent = t(e.part) + " · " + whoName(e.who) + (e.note && e.kind !== "event" ? " · " + e.note : "");
       li.append(dot, main, meta);
       ul.appendChild(li);
     });
@@ -989,7 +1113,8 @@ function weekGrid(entries) {
       return dots;
     };
     const poops = dayEntries.filter((e) => e.kind === "poop")
-      .map((e) => pill("poop " + (e.type || "unknown"), "poop " + (e.type || "unknown"), e.type ? t(e.type + "Short") : "?"));
+      .map((e) => pill("poop " + (e.type || "unknown"), "poop " + (e.type || "unknown"),
+        (e.type ? t(e.type + "Short") : "?") + (e.look === "off" ? " ⚠️" : "")));
 
     const row = document.createElement("button");
     row.type = "button";
@@ -997,6 +1122,13 @@ function weekGrid(entries) {
     const label = document.createElement("span");
     label.className = "week-day";
     label.textContent = shortDay(day);
+    // Events sit under the day, so they line up with that day's food and poop
+    dayEntries.filter((e) => e.kind === "event").forEach((e) => {
+      const ev = document.createElement("span");
+      ev.className = "week-event";
+      ev.textContent = "📌 " + e.note;
+      label.appendChild(ev);
+    });
     row.append(label, cell(foodDots("dairy")), cell(foodDots("wheat")), cell(poops));
     row.addEventListener("click", () => {
       const target = $("day-" + day);
@@ -1026,10 +1158,16 @@ function startEdit(e) {
   disarmDelete();
   if (e.kind === "poop") {
     state.tab = "poop";
-    state.poop = { editId: e.id, editAt: e.at || Date.now(), day: e.day, otherOpen: false, part: e.part, type: e.type || null, note: e.note || "" };
+    state.poop = { editId: e.id, editAt: e.at || Date.now(), day: e.day, otherOpen: false, part: e.part, type: e.type || null, look: e.look || null, note: e.note || "" };
     $("poop-when-pick").hidden = false;
     render();
     $("poop-edit-bar").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else if (e.kind === "event") {
+    state.tab = "event";
+    state.event = { editId: e.id, editAt: e.at || Date.now(), day: e.day, otherOpen: false, part: e.part, text: e.note || "" };
+    $("event-when-pick").hidden = false;
+    render();
+    $("event-edit-bar").scrollIntoView({ behavior: "smooth", block: "start" });
   } else {
     state.tab = "food";
     state.food = {
@@ -1046,6 +1184,7 @@ function startEdit(e) {
 function stopEditing() {
   if (state.food.editId) state.food = blankFood();
   if (state.poop.editId) state.poop = blankPoop();
+  if (state.event.editId) state.event = blankEvent();
   disarmDelete();
 }
 
@@ -1121,6 +1260,10 @@ $("help-btn").addEventListener("click", () => {
 $("who-change").addEventListener("click", () => { state.whoOpen = true; render(); });
 $("tab-food").addEventListener("click", () => { state.tab = "food"; render(); });
 $("tab-poop").addEventListener("click", () => { state.tab = "poop"; render(); });
+$("tab-event").addEventListener("click", () => { state.tab = "event"; render(); });
+$("event-when-btn").addEventListener("click", () => { $("event-when-pick").hidden = !$("event-when-pick").hidden; });
+$("event-date").addEventListener("change", (e) => { if (e.target.value) { state.event.day = e.target.value; render(); } });
+$("event-text").addEventListener("input", (e) => { state.event.text = e.target.value; });
 $("food-when-btn").addEventListener("click", () => { $("food-when-pick").hidden = !$("food-when-pick").hidden; });
 $("poop-when-btn").addEventListener("click", () => { $("poop-when-pick").hidden = !$("poop-when-pick").hidden; });
 $("food-date").addEventListener("change", (e) => { if (e.target.value) { state.food.day = e.target.value; render(); } });
@@ -1167,7 +1310,7 @@ $("poop-save").addEventListener("click", () => {
   if (needWho()) return;
   const p = state.poop;
   if (!p.type) { toast(t("pickPoop")); return; }
-  const fields = { kind: "poop", day: p.day, part: p.part, type: p.type, note: p.note.trim() };
+  const fields = { kind: "poop", day: p.day, part: p.part, type: p.type, look: p.look, note: p.note.trim() };
   api.put(p.editId ? makeEntry({ ...fields, id: p.editId, at: p.editAt }) : makeEntry(fields));
   if (!p.editId) markAdded("poop");
   state.poop = blankPoop();
@@ -1179,6 +1322,25 @@ $("poop-save").addEventListener("click", () => {
 $("poop-cancel").addEventListener("click", () => { state.poop = blankPoop(); $("poop-note").value = ""; disarmDelete(); $("poop-when-pick").hidden = true; render(); });
 $("poop-delete").addEventListener("click", (ev) => {
   tapDelete(ev.currentTarget, state.poop.editId, () => { state.poop = blankPoop(); $("poop-note").value = ""; $("poop-when-pick").hidden = true; });
+});
+
+$("event-save").addEventListener("click", () => {
+  if (needWho()) return;
+  const ev = state.event;
+  const text = ev.text.trim();
+  if (!text) { toast(t("eventEmpty")); $("event-text").focus(); return; }
+  const fields = { kind: "event", day: ev.day, part: ev.part, note: text };
+  api.put(ev.editId ? makeEntry({ ...fields, id: ev.editId, at: ev.editAt }) : makeEntry(fields));
+  if (!ev.editId) markAdded("event");
+  state.event = blankEvent();
+  $("event-text").value = "";
+  $("event-when-pick").hidden = true;
+  render();
+  toast(t(ev.editId ? "saved" : "added"));
+});
+$("event-cancel").addEventListener("click", () => { state.event = blankEvent(); $("event-text").value = ""; disarmDelete(); $("event-when-pick").hidden = true; render(); });
+$("event-delete").addEventListener("click", (evt) => {
+  tapDelete(evt.currentTarget, state.event.editId, () => { state.event = blankEvent(); $("event-text").value = ""; $("event-when-pick").hidden = true; });
 });
 
 render();

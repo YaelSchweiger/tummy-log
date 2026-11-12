@@ -353,10 +353,12 @@ label { font-weight: 400; font-size: 0.95rem; }
       </div>
 
       <div class="card food poop-card">
-        <h3><span class="emoji" aria-hidden="true">💩</span><span data-t="type"></span></h3>
-        <h4 data-t="consistency"></h4>
+        <h3><span class="emoji" aria-hidden="true">💩</span><span data-t="consistency"></span></h3>
         <div class="chips" id="poop-type"></div>
-        <h4 data-t="lookTitle"></h4>
+      </div>
+
+      <div class="card food poop-card">
+        <h3><span class="emoji" aria-hidden="true">👀</span><span data-t="lookTitle"></span></h3>
         <div class="chips" id="poop-look"></div>
         <label for="poop-note" id="poop-note-label"></label>
         <textarea id="poop-note"></textarea>
@@ -443,7 +445,7 @@ const T = {
     editing: "Editing your entry", cancel: "Cancel", edit: "Edit",
     del: "Delete this entry", delSure: "Tap again to delete",
     addPoop: "Add poop for today", poopLogged: "Poop logged", poopEditing: "Editing poop",
-    type: "Please choose both (this is important for us)", consistency: "Consistency", normal: "Normal", hard: "Hard", firm: "Firm, in pieces", soft: "Soft but OK", verysoft: "Very soft", fluid: "Diarrhea",
+    type: "Please choose both (this is important for us)", consistency: "Please choose the consistency", normal: "Normal", hard: "Hard", firm: "Firm, in pieces", soft: "Soft but OK", verysoft: "Very soft", fluid: "Diarrhea",
     note: "Note (optional)", notePh: "Anything else?",
     poopAuto: "Already saved automatically. Tap Save when you're done.",
     entriesOf: "{name}'s entries", schoolEntries: "School's entries", yourEntries: "Your entries",
@@ -458,7 +460,7 @@ const T = {
     help2: "Tap Food, Poop or Event for what you want to log. You can log all of them, as many times as you need.",
     event: "Event", eventTitle: "What happened?", eventPh: "For example: vaccine, fever, new medicine",
     eventEmpty: "Type what happened first", eventHide: "Remove this button",
-    lookTitle: "How did it look overall?", lookOk: "Looks OK", lookOff: "Looks off",
+    lookTitle: "Please choose how it looked overall", lookOk: "Looks OK", lookOff: "Looks off",
     lookOkShort: "looks OK", lookOffShort: "looks off", noteOff: "What looked off? Please write a few words.",
     help3: "Tap what fits, then tap Add this entry. For poop, always choose both: the consistency and how it looked. The note is optional.",
     pickLook: "Please choose how it looked overall",
@@ -504,7 +506,7 @@ const T = {
     editing: "Du bearbeitest deinen Eintrag", cancel: "Abbrechen", edit: "Bearbeiten",
     del: "Eintrag löschen", delSure: "Zum Löschen nochmal tippen",
     addPoop: "Stuhlgang für heute eintragen", poopLogged: "Stuhlgang eingetragen", poopEditing: "Stuhlgang bearbeiten",
-    type: "Bitte beides auswählen (das ist uns wichtig)", consistency: "Konsistenz", normal: "Normal", hard: "Hart", firm: "Fest, in Stücken", soft: "Weich, aber okay", verysoft: "Sehr weich", fluid: "Durchfall",
+    type: "Bitte beides auswählen (das ist uns wichtig)", consistency: "Bitte die Konsistenz auswählen", normal: "Normal", hard: "Hart", firm: "Fest, in Stücken", soft: "Weich, aber okay", verysoft: "Sehr weich", fluid: "Durchfall",
     note: "Notiz (optional)", notePh: "Sonst noch etwas?",
     poopAuto: "Schon automatisch gespeichert. Tippe auf Speichern, wenn du fertig bist.",
     entriesOf: "Einträge von {name}", schoolEntries: "Einträge der Schule", yourEntries: "Deine Einträge",
@@ -519,7 +521,7 @@ const T = {
     help2: "Tippe auf Essen, Stuhlgang oder Ereignis, je nachdem, was du eintragen willst. Du kannst alles eintragen, so oft wie nötig.",
     event: "Ereignis", eventTitle: "Was ist passiert?", eventPh: "Zum Beispiel: Impfung, Fieber, neues Medikament",
     eventEmpty: "Bitte zuerst eintragen, was passiert ist", eventHide: "Diesen Knopf entfernen",
-    lookTitle: "Wie sah er insgesamt aus?", lookOk: "Sieht okay aus", lookOff: "Sieht auffällig aus",
+    lookTitle: "Bitte auswählen, wie er insgesamt aussah", lookOk: "Sieht okay aus", lookOff: "Sieht auffällig aus",
     lookOkShort: "sieht okay aus", lookOffShort: "auffällig", noteOff: "Was war auffällig? Bitte kurz beschreiben.",
     help3: "Antippen, was passt, dann auf „Eintrag hinzufügen“. Beim Stuhlgang bitte immer beides wählen: die Konsistenz und wie er aussah. Die Notiz ist freiwillig.",
     pickLook: "Bitte auswählen, wie er insgesamt aussah",
